@@ -13,20 +13,32 @@ class CustomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NavigationBar(
-      backgroundColor: Theme.of(context).cardColor,
-      indicatorColor: Theme.of(context).canvasColor,
-      shadowColor: Theme.of(context).shadowColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      indicatorColor: Colors.grey[200],
+      shadowColor: Colors.black.withOpacity(0.1),
       selectedIndex: selectedIndex,
       onDestinationSelected: onTap,
-      destinations: const [
+      destinations: [
         NavigationDestination(
-          icon: Icon(Icons.note,),
-          selectedIcon: Icon(Icons.note),
+          icon: Icon(
+            Icons.note_outlined,
+            color: Colors.grey[600],
+          ),
+          selectedIcon: Icon(
+            Icons.note,
+            color: Colors.black,
+          ),
           label: 'Notlar',
         ),
         NavigationDestination(
-          icon: Icon(Icons.settings_outlined),
-          selectedIcon: Icon(Icons.settings),
+          icon: Icon(
+            Icons.settings_outlined,
+            color: Colors.grey[600],
+          ),
+          selectedIcon: Icon(
+            Icons.settings,
+            color: Colors.black,
+          ),
           label: 'Ayarlar',
         ),
       ],

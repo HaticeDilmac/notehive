@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:notehive/core/auth_service.dart';
 
 // --- Events ---
@@ -21,7 +22,13 @@ class AuthResetPasswordRequested extends AuthEvent {
 
 class AuthLogoutRequested extends AuthEvent {}
 
+class AuthDeleteAccountRequested extends AuthEvent {}
+
 class CheckAuthStatus extends AuthEvent {}
+
+class SendEmailVerification extends AuthEvent {}
+
+class EmailVerificationSent extends AuthEvent {}
 
 // --- States ---
 abstract class AuthState {}
@@ -30,11 +37,24 @@ class AuthInitial extends AuthState {}
 
 class AuthLoading extends AuthState {}
 
-class AuthSuccess extends AuthState {}
+class AuthSuccess extends AuthState {
+  final User? user;
+  AuthSuccess({this.user});
+}
 
 class AuthFailure extends AuthState {
   final String error;
   AuthFailure(this.error);
+}
+
+class EmailVerificationRequired extends AuthState {
+  final String email;
+  EmailVerificationRequired(this.email);
+}
+
+class EmailVerificationSentSuccess extends AuthState {
+  final String message;
+  EmailVerificationSentSuccess(this.message);
 }
 
 // --- Bloc ---
@@ -44,18 +64,52 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLoginRequested>((event, emit) async {
       emit(AuthLoading());
       try {
-        await authService.signIn(event.email, event.password);
-        emit(AuthSuccess());
+        final user = await authService.signIn(event.email, event.password);
+        if (user != null) {
+          emit(AuthSuccess(user: user));
+        } else {
+          emit(AuthFailure('Login failed'));
+        }
+      } catch (e) {
+        emit(AuthFailure(e.toString()));
+      }
+    });
+
+    on<AuthRegisterRequested>((event, emit) async {
+      emit(AuthLoading());
+      try {
+        final user = await authService.register(
+          event.email,
+          event.password,
+          event.name,
+        );
+        if (user != null) {
+          emit(EmailVerificationRequired(event.email));
+        } else {
+          emit(AuthFailure('Registration failed'));
+        }
       } catch (e) {
         emit(AuthFailure(e.toString()));
       }
     });
 
     on<CheckAuthStatus>((event, emit) async {
+      print("CheckAuthStatus event received");
       final user = authService.currentUser;
+      print("Current user: $user");
       if (user != null) {
-        emit(AuthSuccess());
+        // Check if email is verified
+        final isVerified = await authService.isEmailVerified();
+        print("Email verified: $isVerified");
+        if (isVerified) {
+          print("Emitting AuthSuccess");
+          emit(AuthSuccess(user: user));
+        } else {
+          print("Emitting EmailVerificationRequired");
+          emit(EmailVerificationRequired(user.email ?? ''));
+        }
       } else {
+        print("No user found, emitting AuthInitial");
         emit(AuthInitial());
       }
     });
@@ -64,7 +118,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthLoading());
       try {
         await authService.resetPassword(event.email);
-        emit(AuthInitial());
+        emit(AuthSuccess());
+      } catch (e) {
+        emit(AuthFailure(e.toString()));
+      }
+    });
+
+    on<SendEmailVerification>((event, emit) async {
+      emit(AuthLoading());
+      try {
+        await authService.sendEmailVerification();
+        emit(
+          EmailVerificationSentSuccess('Verification email sent successfully!'),
+        );
       } catch (e) {
         emit(AuthFailure(e.toString()));
       }
@@ -73,6 +139,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogoutRequested>((event, emit) async {
       await authService.signOut();
       emit(AuthInitial());
+    });
+
+    on<AuthDeleteAccountRequested>((event, emit) async {
+      emit(AuthLoading());
+      try {
+        await authService.deleteAccount();
+        emit(AuthInitial());
+      } catch (e) {
+        emit(AuthFailure(e.toString()));
+      }
     });
   }
 }

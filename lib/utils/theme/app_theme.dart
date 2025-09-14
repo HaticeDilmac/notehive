@@ -13,6 +13,7 @@ class AppTheme {
       scaffoldBackgroundColor: Colors.white,
       primaryColor: const Color.fromARGB(255, 255, 234, 138),
       cardColor: Colors.grey[100],
+      canvasColor: Colors.black,
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -42,6 +43,7 @@ class AppTheme {
       scaffoldBackgroundColor: Colors.black,
       primaryColor: const Color.fromARGB(255, 255, 234, 138),
       cardColor: Colors.grey[850],
+      canvasColor: Colors.white, 
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         backgroundColor: Colors.black,

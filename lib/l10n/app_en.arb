@@ -1,0 +1,17 @@
+{
+  "appTitle": "NoteHive",
+  "settings": "Settings",
+  "profile": "Profile",
+  "yourAccount": "Your account",
+  "changeAvatar": "Change Avatar",
+  "logout": "Log Out",
+  "general": "General",
+  "darkMode": "Dark Mode",
+  "language": "Turkish",
+  "account": "Account",
+  "deleteAccount": "Delete Account",
+  "deleteConfirmTitle": "Delete Account",
+  "deleteConfirmBody": "Are you sure you want to delete your account? This action cannot be undone and all your notes will be deleted.",
+  "cancel": "Cancel",
+  "delete": "Delete"
+}

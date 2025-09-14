@@ -1,0 +1,17 @@
+{
+  "appTitle": "NoteHive",
+  "settings": "Ayarlar",
+  "profile": "Profil",
+  "yourAccount": "Hesabınız",
+  "changeAvatar": "Avatarı Değiştir",
+  "logout": "Çıkış Yap",
+  "general": "Genel",
+  "darkMode": "Karanlık Mod",
+  "language": "Türkçe",
+  "account": "Hesap",
+  "deleteAccount": "Hesabı Sil",
+  "deleteConfirmTitle": "Hesabı Sil",
+  "deleteConfirmBody": "Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve tüm notlarınız silinecektir.",
+  "cancel": "İptal",
+  "delete": "Sil"
+}
