@@ -1,0 +1,30 @@
+{
+              "flutter": {
+                            "platforms": {
+                                          "android": {
+                                                        "default": {
+                                                                      "projectId": "notehive-app",
+                                                                      "appId": "1:263331977441:android:3cc27370a0614b1a11bfa0",
+                                                                      "fileOutput": "android/app/google-services.json"
+                                                        }
+                                          },
+                                          "ios": {
+                                                        "default": {
+                                                                      "projectId": "notehive-app",
+                                                                      "appId": "1:263331977441:ios:c55d7ec9f81afd3911bfa0",
+                                                                      "uploadDebugSymbols": false,
+                                                                      "fileOutput": "ios/Runner/GoogleService-Info.plist"
+                                                        }
+                                          },
+                                          "dart": {
+                                                        "lib/firebase_options.dart": {
+                                                                      "projectId": "notehive-app",
+                                                                      "configurations": {
+                                                                                    "android": "1:263331977441:android:3cc27370a0614b1a11bfa0",
+                                                                                    "ios": "1:263331977441:ios:c55d7ec9f81afd3911bfa0"
+                                                                      }
+                                                        }
+                                          }
+                            }
+              }
+}
