@@ -57,6 +57,11 @@ class EmailVerificationSentSuccess extends AuthState {
   EmailVerificationSentSuccess(this.message);
 }
 
+class PasswordResetEmailSent extends AuthState {
+  final String message;
+  PasswordResetEmailSent(this.message);
+}
+
 // --- Bloc ---
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthService authService;
@@ -118,7 +123,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthLoading());
       try {
         await authService.resetPassword(event.email);
-        emit(AuthSuccess());
+        emit(PasswordResetEmailSent('Şifre sıfırlama bağlantısı email ile gönderildi.'));
       } catch (e) {
         emit(AuthFailure(e.toString()));
       }

@@ -51,17 +51,7 @@ class _SplashPageState extends State<SplashPage> {
       },
       child: Scaffold(
         body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                const Color(0xFFFFF8E1),
-                Colors.white,
-                const Color(0xFFFFF8E1),
-              ],
-            ),
-          ),
+          color: Theme.of(context).scaffoldBackgroundColor,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

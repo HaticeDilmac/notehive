@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -68,24 +69,64 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _showDeleteAccountDialog() {
-    showDialog(
+    showCupertinoDialog(
       context: context,
+      barrierDismissible: true,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.deleteConfirmTitle),
-          content: Text(AppLocalizations.of(context)!.deleteConfirmBody),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(AppLocalizations.of(context)!.cancel),
+        final l10n = AppLocalizations.of(context);
+        return CupertinoAlertDialog(
+          title: Text(l10n?.deleteConfirmTitle ?? 'Hesabı Sil'),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              l10n?.deleteConfirmBody ??
+                  'Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
             ),
-            TextButton(
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n?.cancel ?? 'İptal'),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
               onPressed: () {
                 Navigator.of(context).pop();
                 context.read<AuthBloc>().add(AuthDeleteAccountRequested());
               },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: Text(AppLocalizations.of(context)!.delete),
+              child: Text(l10n?.delete ?? 'Sil'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLogoutDialog() {
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        final l10n = AppLocalizations.of(context);
+        return CupertinoAlertDialog(
+          title: Text(l10n?.logoutConfirmTitle ?? 'Çıkış Yap'),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              l10n?.logoutConfirmBody ?? 'Çıkış yapmak istediğinize emin misiniz?',
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n?.cancel ?? 'İptal'),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.read<AuthBloc>().add(AuthLogoutRequested());
+              },
+              child: Text(l10n?.logout ?? 'Çıkış Yap'),
             ),
           ],
         );
@@ -198,8 +239,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Hesabınız",
-                          style: Theme.of(context).textTheme.labelMedium
+                          l10n?.yourAccount ?? 'Hesabınız',
+                          style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(color: Colors.grey[600]),
                         ),
                         SizedBox(height: 0.4.h),
@@ -207,8 +248,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           userEmail.isNotEmpty ? userEmail : "Kullanıcı",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w700),
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
                         SizedBox(height: 1.0.h),
                         Row(
@@ -226,15 +266,14 @@ class _SettingsPageState extends State<SettingsPage> {
                                     Theme.of(context).textTheme.labelLarge,
                               ),
                               icon: const Icon(Icons.edit_outlined, size: 16),
-                              label: const Text("Avatarı Değiştir"),
+                              label: Text(
+                                l10n?.changeAvatar ?? 'Avatarı Değiştir',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
                             ),
                             SizedBox(width: 2.w),
                             TextButton(
-                              onPressed: () {
-                                context.read<AuthBloc>().add(
-                                  AuthLogoutRequested(),
-                                );
-                              },
+                              onPressed: _showLogoutDialog,
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.black,
                                 padding: EdgeInsets.symmetric(
@@ -242,7 +281,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                   vertical: 0.8.h,
                                 ),
                               ),
-                              child: const Text("Çıkış Yap"),
+                              child: Text(
+                                l10n?.logout ?? 'Çıkış Yap',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
                             ),
                           ],
                         ),
@@ -315,10 +357,18 @@ class _SettingsPageState extends State<SettingsPage> {
                       size: 22,
                     ),
                     title: Text(
-                      l10n?.language ?? 'Türkçe',
+                      l10n?.languageTitle ?? 'Dil',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
+                    ),
+                    subtitle: Text(
+                      _isTurkish
+                          ? (l10n?.turkish ?? 'Türkçe')
+                          : (l10n?.english ?? 'İngilizce'),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                     ),
                     trailing: Switch(
                       value: _isTurkish,
@@ -376,9 +426,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: Colors.grey[400],
                       size: 20,
                     ),
-                    onTap: () {
-                      context.read<AuthBloc>().add(AuthLogoutRequested());
-                    },
+                    onTap: _showLogoutDialog,
                   ),
 
                   const Divider(height: 1, thickness: 0.5),

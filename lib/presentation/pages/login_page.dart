@@ -1,7 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../logic/auth/auth_bloc.dart';
 
@@ -88,7 +88,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               ),
             );
           } else if (state is AuthSuccess) {
-            Navigator.pushReplacementNamed(context, "/roots");
+            Navigator.pushReplacementNamed(context, "/root");
           } else if (state is EmailVerificationRequired) {
             Navigator.pushNamed(
               context,
@@ -106,31 +106,32 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                 ),
               ),
             );
+          } else if (state is PasswordResetEmailSent) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green[600],
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            );
           }
         },
         builder: (context, state) {
           return Container(
             height: 100.h,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  const Color(0xFFFFF8E1),
-                  Colors.white,
-                  const Color(0xFFFFF8E1),
-                ],
-              ),
-            ),
+            color: Theme.of(context).scaffoldBackgroundColor,
             child: SafeArea(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 5.w),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
                   child: Column(
                     children: [
                       // Header Section - Daha kompakt
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 6.h),
                       FadeTransition(
                         opacity: _fadeAnimation,
                         child: Column(
@@ -141,10 +142,15 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               height: 18.w,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.black,
+                                color: Theme.of(context).colorScheme.primary,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
+                                    color: Colors.black.withOpacity(
+                                      Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? 0.2
+                                          : 0.5,
+                                    ),
                                     blurRadius: 15,
                                     offset: const Offset(0, 8),
                                   ),
@@ -167,22 +173,31 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               ),
                             ),
                             SizedBox(height: 2.h),
-                            // Title - Daha küçük
                             Text(
                               "NoteHive",
                               style: TextStyle(
                                 fontSize: 26.sp,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.black,
+                                color: Theme.of(context).colorScheme.primary,
                                 letterSpacing: -0.5,
                               ),
                             ),
                             SizedBox(height: 0.5.h),
                             Text(
-                              isLoginMode ? "Welcome back" : "Create account",
+                              isLoginMode
+                                  ? (AppLocalizations.of(
+                                        context,
+                                      )?.loginWelcome ??
+                                      'Welcome back')
+                                  : (AppLocalizations.of(
+                                        context,
+                                      )?.loginCreateAccount ??
+                                      'Create account'),
                               style: TextStyle(
                                 fontSize: 14.sp,
-                                color: Colors.grey[600],
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
@@ -199,11 +214,16 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           width: double.infinity,
                           padding: EdgeInsets.all(5.w),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withOpacity(
+                                  Theme.of(context).brightness ==
+                                          Brightness.light
+                                      ? 0.08
+                                      : 0.3,
+                                ),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
@@ -216,7 +236,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               Container(
                                 height: 4.5.h,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFFFF8E1),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceVariant.withOpacity(0.6),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Row(
@@ -254,14 +276,21 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                           ),
                                           child: Center(
                                             child: Text(
-                                              "Sign In",
+                                              AppLocalizations.of(
+                                                    context,
+                                                  )?.signIn ??
+                                                  'Sign In',
                                               style: TextStyle(
                                                 fontSize: 13.sp,
                                                 fontWeight: FontWeight.w600,
                                                 color:
                                                     isLoginMode
                                                         ? Colors.black
-                                                        : Colors.grey[600],
+                                                        : Theme.of(context)
+                                                            .textTheme
+                                                            .bodyMedium
+                                                            ?.color
+                                                            ?.withOpacity(0.6),
                                               ),
                                             ),
                                           ),
@@ -309,7 +338,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                                 color:
                                                     !isLoginMode
                                                         ? Colors.black
-                                                        : Colors.grey[600],
+                                                        : Theme.of(context)
+                                                            .textTheme
+                                                            .bodyMedium
+                                                            ?.color
+                                                            ?.withOpacity(0.6),
                                               ),
                                             ),
                                           ),
@@ -326,7 +359,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               if (!isLoginMode) ...[
                                 _buildTextField(
                                   nameController,
-                                  "Full Name",
+                                  AppLocalizations.of(context)?.fullName ??
+                                      'Full Name',
                                   Icons.person_outline,
                                 ),
                                 SizedBox(height: 1.8.h),
@@ -334,14 +368,15 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
                               _buildTextField(
                                 emailController,
-                                "Email",
+                                AppLocalizations.of(context)?.email ?? 'Email',
                                 Icons.email_outlined,
                               ),
                               SizedBox(height: 1.8.h),
 
                               _buildTextField(
                                 passwordController,
-                                "Password",
+                                AppLocalizations.of(context)?.password ??
+                                    'Password',
                                 Icons.lock_outline,
                                 isPassword: true,
                                 isPasswordVisible: isPasswordVisible,
@@ -356,7 +391,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 SizedBox(height: 1.8.h),
                                 _buildTextField(
                                   confirmPasswordController,
-                                  "Confirm Password",
+                                  AppLocalizations.of(
+                                        context,
+                                      )?.confirmPassword ??
+                                      'Confirm Password',
                                   Icons.lock_outline,
                                   isPassword: true,
                                   isPasswordVisible: isConfirmPasswordVisible,
@@ -395,8 +433,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                                   context,
                                                 ).showSnackBar(
                                                   SnackBar(
-                                                    content: const Text(
-                                                      "Passwords do not match",
+                                                    content: Text(
+                                                      AppLocalizations.of(
+                                                            context,
+                                                          )?.passwordsDontMatch ??
+                                                          'Passwords do not match',
                                                     ),
                                                     backgroundColor:
                                                         Colors.red[600],
@@ -423,10 +464,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                             }
                                           },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black,
-                                    foregroundColor: const Color(
-                                      0xFFFFD700,
-                                    ), // Sarı
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.primary,
+                                    foregroundColor:
+                                        Theme.of(context).cardColor,
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
@@ -438,19 +479,24 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                           ? SizedBox(
                                             height: 2.5.h,
                                             width: 2.5.h,
-                                            child:
-                                                const CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation<
-                                                        Color
-                                                      >(Color(0xFFFFD700)),
-                                                ),
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Theme.of(context).cardColor,
+                                                  ),
+                                            ),
                                           )
                                           : Text(
                                             isLoginMode
-                                                ? "Sign In"
-                                                : "Create Account",
+                                                ? (AppLocalizations.of(
+                                                      context,
+                                                    )?.signIn ??
+                                                    'Sign In')
+                                                : (AppLocalizations.of(
+                                                      context,
+                                                    )?.createAccount ??
+                                                    'Create Account'),
                                             style: TextStyle(
                                               fontSize: 15.sp,
                                               fontWeight: FontWeight.w600,
@@ -459,28 +505,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 ),
                               ),
 
-                              if (isLoginMode) ...[
-                                SizedBox(height: 2.h),
-                                Center(
-                                  child: TextButton(
-                                    onPressed: () {
-                                      context.read<AuthBloc>().add(
-                                        AuthResetPasswordRequested(
-                                          emailController.text,
-                                        ),
-                                      );
-                                    },
-                                    child: Text(
-                                      "Forgot Password?",
-                                      style: TextStyle(
-                                        fontSize: 13.sp,
-                                        color: Colors.grey[600],
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              // Forgot password removed by request
                             ],
                           ),
                         ),
@@ -491,11 +516,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       FadeTransition(
                         opacity: _fadeAnimation,
                         child: Text(
-                          "By continuing, you agree to our Terms of Service and Privacy Policy",
+                          AppLocalizations.of(context)?.terms ??
+                              'By continuing, you agree to our Terms of Service and Privacy Policy',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 10.sp,
-                            color: Colors.grey[500],
+                            fontSize: 12.sp,
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.color?.withOpacity(0.6),
                             height: 1.4,
                           ),
                         ),
@@ -523,18 +551,30 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     return Container(
       height: 5.5.h,
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF8E1), // Açık sarı
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.6),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.grey[300]!, width: 1),
       ),
       child: TextField(
         controller: controller,
         obscureText: isPassword && !isPasswordVisible,
-        style: TextStyle(fontSize: 14.sp, color: Colors.black),
+        style: TextStyle(
+          fontSize: 14.sp,
+          color: Theme.of(context).textTheme.bodyMedium?.color,
+        ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
-          prefixIcon: Icon(icon, color: Colors.black, size: 18.sp),
+          hintStyle: TextStyle(
+            fontSize: 14.sp,
+            color: Theme.of(
+              context,
+            ).textTheme.bodySmall?.color?.withOpacity(0.6),
+          ),
+          prefixIcon: Icon(
+            icon,
+            color: Theme.of(context).iconTheme.color,
+            size: 18.sp,
+          ),
           suffixIcon:
               isPassword
                   ? IconButton(
@@ -542,7 +582,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       isPasswordVisible
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
-                      color: Colors.grey[600],
+                      color: Theme.of(
+                        context,
+                      ).iconTheme.color?.withOpacity(0.7),
                       size: 18.sp,
                     ),
                     onPressed: onTogglePassword,
