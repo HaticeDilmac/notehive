@@ -22,23 +22,18 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // .env yükle (ör: OPENAI_API_KEY)
   try {
     await dotenv.load(fileName: '.env');
-  } catch (_) {
-    // .env olmayabilir, prod için sorun değil
-  }
+  } catch (_) {}
 
-  // Firebase'i initialize et
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
   // Firestore offline persistence
   await NotesRepository.enablePersistence();
 
   // Initialize local Hive cache and attach to repository
   NotesRepository.defaultLocal = await LocalNotesDataSource.init();
 
-  //Firebase App Check'i aktif et
+  //Firebase App Check active - for security
   await FirebaseAppCheck.instance.activate(
     //appCheck actice codde
     androidProvider: AndroidProvider.playIntegrity,
@@ -49,7 +44,7 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
   runApp(
-    MultiBlocProvider(
+    MultiBlocProvider( 
       providers: [
         BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => LanguageCubit()),

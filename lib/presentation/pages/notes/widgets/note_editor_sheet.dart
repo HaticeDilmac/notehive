@@ -86,7 +86,7 @@ class _NoteEditorSheetState extends State<NoteEditorSheet> {
             children: [
               TextField(
                 controller: _contentController,
-                maxLines: 8,
+                maxLines: 6,
                 decoration: InputDecoration(
                   hintText: loc.contentHint,
                   filled: true,
@@ -109,55 +109,66 @@ class _NoteEditorSheetState extends State<NoteEditorSheet> {
                   elevation: 1,
                   child: InkWell(
                     customBorder: const CircleBorder(),
-                    onTap: _isSummarizing
-                        ? null
-                        : () async {
-                            final text = _contentController.text.trim();
-                            if (text.isEmpty) return;
-                            setState(() => _isSummarizing = true);
-                            try {
-                              final summary = await _summarizer.summarize(text);
-                              if (!mounted) return;
-                              _contentController.text = summary;
-                              _contentController.selection = TextSelection.collapsed(
-                                offset: _contentController.text.length,
-                              );
-                            } catch (e) {
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('${AppLocalizations.of(context)!.operationFailed}: $e')),
-                              );
-                            } finally {
-                              if (mounted) setState(() => _isSummarizing = false);
-                            }
-                          },
+                    onTap:
+                        _isSummarizing
+                            ? null
+                            : () async {
+                              final text = _contentController.text.trim();
+                              if (text.isEmpty) return;
+                              setState(() => _isSummarizing = true);
+                              try {
+                                final summary = await _summarizer.summarize(
+                                  text,
+                                );
+                                if (!mounted) return;
+                                _contentController.text = summary;
+                                _contentController
+                                    .selection = TextSelection.collapsed(
+                                  offset: _contentController.text.length,
+                                );
+                              } catch (e) {
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      '${AppLocalizations.of(context)!.operationFailed}: $e',
+                                    ),
+                                  ),
+                                );
+                              } finally {
+                                if (mounted)
+                                  setState(() => _isSummarizing = false);
+                              }
+                            },
                     child: Padding(
                       padding: const EdgeInsets.all(10),
-                      child: _isSummarizing
-                          ? SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation(
-                                  Theme.of(context).colorScheme.onPrimary,
+                      child:
+                          _isSummarizing
+                              ? SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation(
+                                    Theme.of(context).colorScheme.onPrimary,
+                                  ),
                                 ),
+                              )
+                              : Icon(
+                                Icons.auto_awesome,
+                                size: 18,
+                                color: Theme.of(context).colorScheme.onPrimary,
                               ),
-                            )
-                          : Icon(
-                              Icons.auto_awesome,
-                              size: 18,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
                     ),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 1.h),
           SizedBox(
             width: double.infinity,
+            height: 6.h,
             child: ElevatedButton.icon(
               // Button color customized as requested
               style: ElevatedButton.styleFrom(

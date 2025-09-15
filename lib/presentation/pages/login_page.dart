@@ -142,7 +142,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               height: 18.w,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Theme.of(context).colorScheme.primary,
+                                color: Theme.of(context).canvasColor,
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(
@@ -166,7 +166,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                     return Icon(
                                       Icons.note_alt_rounded,
                                       size: 10.w,
-                                      color: const Color(0xFFFFD700), // Sarı
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                     );
                                   },
                                 ),
@@ -174,7 +175,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             ),
                             SizedBox(height: 2.h),
                             Text(
-                              "NoteHive",
+                              AppLocalizations.of(context)?.appTitle ??
+                                  'NoteHive',
                               style: TextStyle(
                                 fontSize: 26.sp,
                                 fontWeight: FontWeight.w700,
@@ -238,7 +240,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 decoration: BoxDecoration(
                                   color: Theme.of(
                                     context,
-                                  ).colorScheme.surfaceVariant.withOpacity(0.6),
+                                  ).colorScheme.surfaceVariant.withOpacity(0.3),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Row(
@@ -254,7 +256,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                           decoration: BoxDecoration(
                                             color:
                                                 isLoginMode
-                                                    ? Colors.white
+                                                    ? Theme.of(
+                                                      context,
+                                                    ).canvasColor
                                                     : Colors.transparent,
                                             borderRadius: BorderRadius.circular(
                                               8,
@@ -285,7 +289,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                                 fontWeight: FontWeight.w600,
                                                 color:
                                                     isLoginMode
-                                                        ? Colors.black
+                                                        ? Theme.of(
+                                                          context,
+                                                        ).primaryColor
                                                         : Theme.of(context)
                                                             .textTheme
                                                             .bodyMedium
@@ -309,7 +315,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                           decoration: BoxDecoration(
                                             color:
                                                 !isLoginMode
-                                                    ? Colors.white
+                                                    ? Theme.of(
+                                                      context,
+                                                    ).cardColor
                                                     : Colors.transparent,
                                             borderRadius: BorderRadius.circular(
                                               8,
@@ -331,13 +339,18 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                           ),
                                           child: Center(
                                             child: Text(
-                                              "Sign Up",
+                                              AppLocalizations.of( 
+                                                    context,
+                                                  )?.createAccount ??
+                                                  'Create Account',
                                               style: TextStyle(
                                                 fontSize: 13.sp,
                                                 fontWeight: FontWeight.w600,
                                                 color:
                                                     !isLoginMode
-                                                        ? Colors.black
+                                                        ? Theme.of(
+                                                          context,
+                                                        ).canvasColor
                                                         : Theme.of(context)
                                                             .textTheme
                                                             .bodyMedium
@@ -465,7 +478,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                           },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
-                                        Theme.of(context).colorScheme.primary,
+                                        Theme.of(context).canvasColor,
                                     foregroundColor:
                                         Theme.of(context).cardColor,
                                     elevation: 0,
