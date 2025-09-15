@@ -49,6 +49,15 @@ Notes:
 - Android emulator backend URL: `http://10.0.2.2:8000`
 - iOS simulator/macOS: `http://127.0.0.1:8000`
 
+## Localization (Flutter gen-l10n)
+- ARB files live under `lib/l10n/` (`app_en.arb`, `app_tr.arb`).
+- `pubspec.yaml` has `flutter: generate: true`, so localizations are generated on build.
+- If you add/change ARB keys and want to regenerate manually:
+```bash
+flutter gen-l10n
+```
+- Generated files include `lib/l10n/app_localizations.dart`, `app_localizations_en.dart`, `app_localizations_tr.dart`.
+
 ## Backend Setup (FastAPI)
 See `backend/README.md`. TL;DR:
 ```bash
