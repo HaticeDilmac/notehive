@@ -189,7 +189,6 @@ class _NoteEditorSheetState extends State<NoteEditorSheet> {
                   return;
                 }
                 await widget.onSubmit(title, content);
-                Navigator.pop(context);
               },
             ),
           ),

@@ -103,6 +103,10 @@ class NotesRepository {
     controller.onListen = () {
       // önce local cache ya da boş liste ver
       if (_local != null) {
+        // İlk yerel anlık görüntüyü hemen yayınla ki UI beklemede kalmasın
+        final initialLocal = _local!.getAllSorted(query: query);
+        controller.add(initialLocal);
+        hasEmitted = true;
         // Hive'daki değişiklikleri canlı izleyelim ki offline anında UI güncellensin
         hiveSub = _local!.watchSorted(query: query).listen((list) {
           controller.add(list);

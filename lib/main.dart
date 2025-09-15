@@ -35,7 +35,7 @@ void main() async {
 
   //Firebase App Check active - for security
   await FirebaseAppCheck.instance.activate(
-    //appCheck actice codde
+    //appCheck actice codde  
     androidProvider: AndroidProvider.playIntegrity,
     appleProvider: AppleProvider.deviceCheck,
   );
