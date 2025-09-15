@@ -107,12 +107,13 @@ OPENAI_ORG=
 - Android emulator cannot reach backend:
   - Use `10.0.2.2` (iOS/macOS uses `127.0.0.1`).
 
-## Screenshots
-Place images under `docs/screenshots/` and reference them here, e.g.:
-
-![Home](docs/screenshots/home.png)
-![Editor](docs/screenshots/editor.png)
-![Dark Mode](docs/screenshots/dark.png)
+## Screenshots 
+<img width="280" alt="calculator" src="https://github.com/user-attachments/assets/2a2e0295-a053-47fd-b977-ef1cc99f7625">   
+<img width="280" alt="calculator" src="https://github.com/user-attachments/assets/1002961f-253e-4837-a33b-6e2d4d52e2c4">   
+<img width="280" alt="calculator" src="https://github.com/user-attachments/assets/54d7647e-6d15-439d-9ac2-42af4fecd8e0">   
+<img width="280" alt="calculator" src="https://github.com/user-attachments/assets/65a4096d-d74e-41eb-b40e-c335652933ed">   
+<img width="280" alt="calculator" src="https://github.com/user-attachments/assets/4e50f337-bbfb-48bc-bfe0-82e0f5acd108">  
+  
 
 ## Demo Video
 https://drive.google.com/file/d/1fOMNQOBKd2cyLCfeCZW2W-QxrxqCY-Cc/view?usp=sharing
