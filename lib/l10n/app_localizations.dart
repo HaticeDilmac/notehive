@@ -274,6 +274,33 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get delete;
+
+  // Notes page
+  String get notesTitle;
+  String get newNote;
+  String get editNote;
+  String get save;
+  String get update;
+  String get titleHint;
+  String get contentHint;
+  String get enterTitleOrContent;
+  String get searchHint;
+  String get filterAll;
+  String get filterPinned;
+  String get error;
+  String get emptyNotes;
+  String get untitled;
+  String get pinnedLabel;
+  String get editAction;
+  String get pinAction;
+  String get unpinAction;
+  String get deleteFailed;
+  String get pinFailed;
+  String get operationFailed;
+  String get goodMorning;
+  String get goodAfternoon;
+  String get goodEvening;
+  String get goodNight;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

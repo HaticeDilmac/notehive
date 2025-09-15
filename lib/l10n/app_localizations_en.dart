@@ -97,4 +97,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get delete => 'Delete';
+
+  @override
+  String get notesTitle => 'Notes';
+
+  @override
+  String get newNote => 'New Note';
+
+  @override
+  String get editNote => 'Edit Note';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get update => 'Update';
+
+  @override
+  String get titleHint => 'Title';
+
+  @override
+  String get contentHint => 'Content';
+
+  @override
+  String get enterTitleOrContent => 'Enter title or content';
+
+  @override
+  String get searchHint => 'Search...';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterPinned => 'Pinned';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get emptyNotes => 'No notes yet. Tap + to add.';
+
+  @override
+  String get untitled => 'Untitled';
+
+  @override
+  String get pinnedLabel => 'Pinned';
+
+  @override
+  String get editAction => 'Edit';
+
+  @override
+  String get pinAction => 'Pin';
+
+  @override
+  String get unpinAction => 'Unpin';
+
+  @override
+  String get deleteFailed => 'Delete failed';
+
+  @override
+  String get pinFailed => 'Pin failed';
+
+  @override
+  String get operationFailed => 'Operation failed';
+
+  @override
+  String get goodMorning => 'Good morning';
+
+  @override
+  String get goodAfternoon => 'Good afternoon';
+
+  @override
+  String get goodEvening => 'Good evening';
+
+  @override
+  String get goodNight => 'Good night';
 }

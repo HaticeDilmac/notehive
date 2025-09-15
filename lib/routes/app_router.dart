@@ -3,7 +3,7 @@ import 'package:notehive/presentation/pages/home_page.dart';
 import 'package:notehive/presentation/pages/settings_page.dart';
 import '../presentation/pages/splash_page.dart';
 import '../presentation/pages/login_page.dart';
-import '../presentation/pages/notes_page.dart';
+import '../presentation/pages/notes/notes_page.dart';
 import '../presentation/pages/email_verification_page.dart';
 
 class AppRouter {

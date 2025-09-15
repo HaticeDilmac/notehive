@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widget/custom_navigationbar.dart';
-import 'notes_page.dart';
+import 'notes/notes_page.dart';
 import 'settings_page.dart';
 
 class RootPage extends StatefulWidget {
