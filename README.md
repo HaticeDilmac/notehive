@@ -115,10 +115,8 @@ Place images under `docs/screenshots/` and reference them here, e.g.:
 ![Dark Mode](docs/screenshots/dark.png)
 
 ## Demo Video
-Add a link to a hosted video (YouTube, Loom, etc.) or a GIF:
-
-- YouTube: https://your-demo-video-url
-- or embed a GIF: `docs/demo.gif`
+https://drive.google.com/file/d/1fOMNQOBKd2cyLCfeCZW2W-QxrxqCY-Cc/view?usp=sharing
+ 
 
 ## Development Notes
 - The notes stream polls the backend every 5s and merges with live Hive updates for instant UX.
