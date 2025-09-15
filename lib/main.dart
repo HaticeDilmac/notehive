@@ -6,7 +6,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:notehive/utils/theme/app_theme.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:notehive/l10n/app_localizations.dart';
 import 'core/auth_service.dart';
 import 'firebase_options.dart';
 import 'logic/auth/auth_bloc.dart';
@@ -15,12 +15,16 @@ import 'logic/language/language_cubit.dart';
 import 'routes/app_router.dart';
 import 'utils/theme/theme_cubit.dart';
 import 'utils/theme/theme_state.dart';
+import 'core/notes_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Firebase'i initialize et
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Firestore offline persistence
+  await NotesRepository.enablePersistence();
 
   //Firebase App Check'i aktif et
   await FirebaseAppCheck.instance.activate(

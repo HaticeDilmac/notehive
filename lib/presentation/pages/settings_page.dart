@@ -9,7 +9,7 @@ import 'package:sizer/sizer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../logic/language/language_cubit.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:notehive/l10n/app_localizations.dart';
 import '../../utils/theme/theme_cubit.dart';
 import '../../logic/auth/auth_bloc.dart';
 
