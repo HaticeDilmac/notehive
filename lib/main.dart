@@ -16,15 +16,27 @@ import 'routes/app_router.dart';
 import 'utils/theme/theme_cubit.dart';
 import 'utils/theme/theme_state.dart';
 import 'core/notes_repository.dart';
+import 'core/local/local_notes_data_source.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // .env yükle (ör: OPENAI_API_KEY)
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // .env olmayabilir, prod için sorun değil
+  }
 
   // Firebase'i initialize et
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Firestore offline persistence
   await NotesRepository.enablePersistence();
+
+  // Initialize local Hive cache and attach to repository
+  NotesRepository.defaultLocal = await LocalNotesDataSource.init();
 
   //Firebase App Check'i aktif et
   await FirebaseAppCheck.instance.activate(

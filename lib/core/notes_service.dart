@@ -66,16 +66,21 @@ class NotesService {
 
   //update note function
   Future<Map<String, dynamic>> updateNote({
-    required int id,
+    required String id,
     required String title,
     required String content,
+    bool? pinned,
   }) async {
     final token = await _getIdToken();
     final uri = Uri.parse('$_baseUrl/notes/$id');
     final res = await _client.put(
       uri,
       headers: _headers(token),
-      body: json.encode({'title': title, 'content': content}),
+      body: json.encode({
+        'title': title,
+        'content': content,
+        if (pinned != null) 'pinned': pinned,
+      }),
     );
     if (res.statusCode != 200) {
       throw Exception('Failed to update note: ${res.body}');
@@ -84,7 +89,7 @@ class NotesService {
   }
 
   //delete note function
-  Future<void> deleteNote(int id) async {
+  Future<void> deleteNote(String id) async {
     final token = await _getIdToken();
     final uri = Uri.parse('$_baseUrl/notes/$id');
     final res = await _client.delete(uri, headers: _headers(token));

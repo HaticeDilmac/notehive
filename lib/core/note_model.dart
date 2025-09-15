@@ -5,6 +5,8 @@ class NoteModel {
   final bool pinned;
   final DateTime createdAt;
   final DateTime updatedAt;
+  // Whether this note is pending local-only change (unsynced)
+  final bool isDirty;
 
   NoteModel({
     required this.id,
@@ -13,6 +15,7 @@ class NoteModel {
     required this.pinned,
     required this.createdAt,
     required this.updatedAt,
+    this.isDirty = false,
   });
 
   Map<String, dynamic> toMap({required String ownerId}) {
@@ -38,6 +41,7 @@ class NoteModel {
       updatedAt: DateTime.fromMillisecondsSinceEpoch(
         (map['updatedAt'] ?? 0) as int,
       ),
+      isDirty: (map['isDirty'] ?? false) as bool,
     );
   }
 }

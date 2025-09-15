@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:notehive/core/note_model.dart';
+import 'package:notehive/core/ai_summarizer.dart';
 import 'package:notehive/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 /// NoteEditorSheet is a reusable bottom sheet for creating/updating notes.
 /// It returns when the user saves or closes. Consumers handle persistence.
@@ -17,6 +19,8 @@ class NoteEditorSheet extends StatefulWidget {
 class _NoteEditorSheetState extends State<NoteEditorSheet> {
   late final TextEditingController _titleController;
   late final TextEditingController _contentController;
+  final AISummarizer _summarizer = AISummarizer();
+  bool _isSummarizing = false;
 
   @override
   void initState() {
@@ -78,20 +82,78 @@ class _NoteEditorSheetState extends State<NoteEditorSheet> {
             ),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _contentController,
-            maxLines: 8,
-            decoration: InputDecoration(
-              hintText: loc.contentHint,
-              filled: true,
-              fillColor: Theme.of(
-                context,
-              ).colorScheme.surfaceVariant.withOpacity(0.4),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
+          Stack(
+            children: [
+              TextField(
+                controller: _contentController,
+                maxLines: 8,
+                decoration: InputDecoration(
+                  hintText: loc.contentHint,
+                  filled: true,
+                  fillColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceVariant.withOpacity(0.4),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.fromLTRB(12, 12, 48, 12),
+                ),
               ),
-            ),
+              Positioned(
+                right: 8,
+                bottom: 8,
+                child: Material(
+                  color: Theme.of(context).colorScheme.primary,
+                  shape: const CircleBorder(),
+                  elevation: 1,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: _isSummarizing
+                        ? null
+                        : () async {
+                            final text = _contentController.text.trim();
+                            if (text.isEmpty) return;
+                            setState(() => _isSummarizing = true);
+                            try {
+                              final summary = await _summarizer.summarize(text);
+                              if (!mounted) return;
+                              _contentController.text = summary;
+                              _contentController.selection = TextSelection.collapsed(
+                                offset: _contentController.text.length,
+                              );
+                            } catch (e) {
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('${AppLocalizations.of(context)!.operationFailed}: $e')),
+                              );
+                            } finally {
+                              if (mounted) setState(() => _isSummarizing = false);
+                            }
+                          },
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: _isSummarizing
+                          ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation(
+                                  Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              ),
+                            )
+                          : Icon(
+                              Icons.auto_awesome,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -116,11 +178,11 @@ class _NoteEditorSheetState extends State<NoteEditorSheet> {
                   return;
                 }
                 await widget.onSubmit(title, content);
-                if (mounted) Navigator.of(context).pop();
+                Navigator.pop(context);
               },
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 1.h),
         ],
       ),
     );

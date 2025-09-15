@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notehive/l10n/app_localizations.dart';
 
 class CustomNavigationBar extends StatelessWidget {
   final int selectedIndex;
@@ -20,26 +21,14 @@ class CustomNavigationBar extends StatelessWidget {
       onDestinationSelected: onTap,
       destinations: [
         NavigationDestination(
-          icon: Icon(
-            Icons.note_outlined,
-            color: Colors.grey[600],
-          ),
-          selectedIcon: Icon(
-            Icons.note,
-            color: Colors.black,
-          ),
-          label: 'Notlar',
+          icon: Icon(Icons.note_add, color: Colors.grey[600]),
+          selectedIcon: Icon(Icons.note, color: Colors.black),
+          label: AppLocalizations.of(context)!.notesTitle,
         ),
         NavigationDestination(
-          icon: Icon(
-            Icons.settings_outlined,
-            color: Colors.grey[600],
-          ),
-          selectedIcon: Icon(
-            Icons.settings,
-            color: Colors.black,
-          ),
-          label: 'Ayarlar',
+          icon: Icon(Icons.settings_outlined, color: Colors.grey[600]),
+          selectedIcon: Icon(Icons.settings, color: Colors.black),
+          label: AppLocalizations.of(context)!.settings,
         ),
       ],
     );

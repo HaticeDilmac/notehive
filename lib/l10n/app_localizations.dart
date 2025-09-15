@@ -301,6 +301,11 @@ abstract class AppLocalizations {
   String get goodAfternoon;
   String get goodEvening;
   String get goodNight;
+  // Notes: extra
+  String get notesUndo;
+  String get notesDeleted;
+  // Router
+  String get routerNotFound;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

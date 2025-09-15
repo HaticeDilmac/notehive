@@ -20,6 +20,7 @@ class _NotesPageState extends State<NotesPage> {
   final NotesRepository _repo = NotesRepository();
   String _query = '';
   bool _showPinnedOnly = false;
+  bool _streamErrorShown = false;
 
   @override
   void initState() {
@@ -43,19 +44,32 @@ class _NotesPageState extends State<NotesPage> {
         return NoteEditorSheet(
           note: note,
           onSubmit: (title, content) async {
-            if (note == null) {
-              await _repo.createNote(title: title, content: content);
-            } else {
-              await _repo.updateNote(
-                NoteModel(
-                  id: note.id,
-                  title: title,
-                  content: content,
-                  pinned: note.pinned,
-                  createdAt: note.createdAt,
-                  updatedAt: DateTime.now(),
-                ),
-              );
+            try {
+              if (note == null) {
+                await _repo.createNote(title: title, content: content);
+              } else {
+                await _repo.updateNote(
+                  NoteModel(
+                    id: note.id,
+                    title: title,
+                    content: content,
+                    pinned: note.pinned,
+                    createdAt: note.createdAt,
+                    updatedAt: DateTime.now(),
+                  ),
+                );
+              }
+              if (mounted) Navigator.pop(context);
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      '${AppLocalizations.of(context)!.operationFailed}: $e',
+                    ),
+                  ),
+                );
+              }
             }
           },
         );
@@ -67,9 +81,10 @@ class _NotesPageState extends State<NotesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 0,
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 84,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
+        title: const GreetingHeader(),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openEditor(),
@@ -79,7 +94,6 @@ class _NotesPageState extends State<NotesPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const GreetingHeader(),
             Padding(
               padding: EdgeInsets.all(0.5.h),
               child: NotesFilterBar(
@@ -96,14 +110,27 @@ class _NotesPageState extends State<NotesPage> {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    print(
-                      "${AppLocalizations.of(context)!.error}: ${snapshot.error}",
-                    );
+                    if (!_streamErrorShown) {
+                      _streamErrorShown = true;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${AppLocalizations.of(context)!.error}: ${snapshot.error}',
+                            ),
+                          ),
+                        );
+                      });
+                    }
                     return Center(
                       child: Text(
                         '${AppLocalizations.of(context)!.error}: ${snapshot.error}',
                       ),
                     );
+                  } else {
+                    // hata yoksa bayrağı sıfırla
+                    _streamErrorShown = false;
                   }
                   final allNotes = snapshot.data ?? [];
                   final notes =
@@ -142,8 +169,39 @@ class _NotesPageState extends State<NotesPage> {
                             colorIndex: index,
                             onTap: () => _openEditor(note: n),
                             onDelete: () async {
+                              final deletedNote = n;
                               try {
-                                await _repo.deleteNote(n);
+                                await _repo.deleteNote(
+                                  deletedNote,
+                                ); //note deletee funct.
+                                if (mounted) {
+                                  final messenger = ScaffoldMessenger.of(
+                                    context,
+                                  );
+                                  messenger.hideCurrentSnackBar();
+                                  messenger.showSnackBar(
+                                    SnackBar(
+                                      duration: const Duration(seconds: 4),
+                                      content: Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.notesDeleted,
+                                      ),
+                                      action: SnackBarAction(
+                                        label:
+                                            AppLocalizations.of(
+                                              context,
+                                            )!.notesUndo,
+                                        onPressed: () async {
+                                          await _repo.createNote(
+                                            title: deletedNote.title,
+                                            content: deletedNote.content,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                }
                               } catch (e) {
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(

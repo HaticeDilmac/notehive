@@ -53,5 +53,8 @@
   "goodMorning": "Good morning",
   "goodAfternoon": "Good afternoon",
   "goodEvening": "Good evening",
-  "goodNight": "Good night"
+  "goodNight": "Good night",
+  "notesUndo": "Undo",
+  "notesDeleted": "Note deleted",
+  "routerNotFound": "404 - Page Not Found"
 }

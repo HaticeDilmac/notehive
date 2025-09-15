@@ -1,132 +1,278 @@
 import 'dart:async';
-// lib/core/notes_repository.dart (en üst)
-import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_core/firebase_core.dart'; // BUNU SİLİN
+// import 'package:cloud_firestore/cloud_firestore.dart'; // removed
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart'; // removed
+
 import 'note_model.dart';
 import 'notes_service.dart';
+import 'local/local_notes_data_source.dart';
 
+// Not veri katmanı: backend API + yerel önbellek (Hive)
 class NotesRepository {
-  NotesRepository({FirebaseFirestore? firestore, NotesService? backendService})
-    : _firestore = firestore ?? FirebaseFirestore.instance,
-      _backendService = backendService ?? NotesService();
-
-  final FirebaseFirestore _firestore;
-  final NotesService _backendService;
-
-  CollectionReference<Map<String, dynamic>> _userNotesCollection(String uid) {
-    return _firestore.collection('users').doc(uid).collection('notes');
-  }
-
-  Future<String> _uid() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw Exception('Not authenticated');
-    return user.uid;
-  }
-
-  // Enable offline persistence
-  static Future<void> enablePersistence() async {
-    try {
-      // Newer Firestore versions: set settings for persistence
-      FirebaseFirestore.instance.settings = const Settings(
-        persistenceEnabled: true,
-      );
-    } catch (_) {
-      // Ignore if not supported or already enabled
+  NotesRepository({
+    NotesService? backendService,
+    LocalNotesDataSource? local,
+  }) : _backendService = backendService ?? NotesService(),
+       _local = local ?? defaultLocal {
+    // internet gelince bekleyen offline işlemleri tekrar dener
+    if (_local != null) {
+      _connSub ??= Connectivity().onConnectivityChanged.listen((list) {
+        final status = list.isNotEmpty ? list.last : ConnectivityResult.none;
+        if (status != ConnectivityResult.none) {
+          syncPendingBackendOps();
+        }
+      });
     }
   }
 
-  Stream<List<NoteModel>> streamNotes({String query = ''}) async* {
-    final uid = await _uid();
-    final base = _userNotesCollection(uid);
-    Query<Map<String, dynamic>> coll;
-    try {
-      coll = base
-          .orderBy('pinned', descending: true)
-          .orderBy('updatedAt', descending: true);
-    } on FirebaseException catch (e) {
-      if (e.code == 'failed-precondition') {
-        // Composite iindex nopt supported in offlineee modee
-        coll = base.orderBy('updatedAt', descending: true);
-      } else {
-        rethrow;
+  final NotesService _backendService;
+  LocalNotesDataSource? _local;
+  static LocalNotesDataSource? defaultLocal;
+  static StreamSubscription<List<ConnectivityResult>>? _connSub;
+
+  // Firestore doğrudan kullanılmıyor; eski metod kaldırıldı
+
+  // FirebaseAuth uid artık burada kullanılmıyor; eski metod kaldırıldı
+
+  // Firestore offline cache artık kullanılmıyor
+  static Future<void> enablePersistence() async {}
+
+  // backend üzerinden notları getirir (local cache + canlı Hive izleme + periyodik poll)
+  Stream<List<NoteModel>> streamNotes({String query = ''}) {
+    final controller = StreamController<List<NoteModel>>.broadcast();
+    bool hasEmitted = false;
+
+    DateTime _parseDate(dynamic v) {
+      if (v is int) return DateTime.fromMillisecondsSinceEpoch(v);
+      if (v is String) return DateTime.tryParse(v) ?? DateTime.now();
+      return DateTime.now();
+    }
+
+    Future<void> refresh() async {
+      try {
+        final conn = await Connectivity().checkConnectivity();
+        if (conn == ConnectivityResult.none) {
+          // offline: mevcut değeri koru
+          return;
+        }
+        final data = await _backendService.fetchNotes();
+        final items = data.map((m) {
+          final id = (m['id'] ?? '') as String;
+          return NoteModel(
+            id: id,
+            title: (m['title'] ?? '') as String,
+            content: (m['content'] ?? '') as String,
+            pinned: (m['pinned'] ?? false) as bool,
+            createdAt: _parseDate(m['createdAt']),
+            updatedAt: _parseDate(m['updatedAt']),
+            isDirty: false,
+          );
+        }).toList(growable: false);
+
+        if (_local != null) {
+          for (final n in items) {
+            await _local!.upsertNote(n);
+          }
+        }
+
+        List<NoteModel> sorted = List.of(items)
+          ..sort((a, b) {
+            if (a.pinned != b.pinned) return a.pinned ? -1 : 1;
+            return b.updatedAt.compareTo(a.updatedAt);
+          });
+
+        if (query.isNotEmpty) {
+          final lower = query.toLowerCase();
+          sorted = sorted
+              .where((n) => n.title.toLowerCase().contains(lower) || n.content.toLowerCase().contains(lower))
+              .toList(growable: false);
+        }
+
+        controller.add(sorted);
+        hasEmitted = true;
+      } catch (_) {
+        // ilk değer hiç yayınlanmadıysa hata göster, aksi halde yoksay
+        if (!hasEmitted) {
+          controller.addError('Failed to load notes');
+        }
       }
     }
 
-    yield* coll.snapshots().map((snapshot) {
-      final items = snapshot.docs
-          .map((d) => NoteModel.fromMap(d.id, d.data()))
-          .toList(growable: false);
-      if (query.isEmpty) return items;
-      final lower = query.toLowerCase();
-      return items
-          .where(
-            (n) =>
-                n.title.toLowerCase().contains(lower) ||
-                n.content.toLowerCase().contains(lower),
-          )
-          .toList(growable: false);
-    });
+    Timer? timer;
+    StreamSubscription<List<NoteModel>>? hiveSub;
+    controller.onListen = () {
+      // önce local cache ya da boş liste ver
+      if (_local != null) {
+        // Hive'daki değişiklikleri canlı izleyelim ki offline anında UI güncellensin
+        hiveSub = _local!.watchSorted(query: query).listen((list) {
+          controller.add(list);
+          hasEmitted = true;
+        });
+      } else {
+        controller.add(const <NoteModel>[]);
+      }
+      // ardından backend'den periyodik çek
+      refresh();
+      timer = Timer.periodic(const Duration(seconds: 5), (_) => refresh());
+    };
+    controller.onCancel = () {
+      timer?.cancel();
+      hiveSub?.cancel();
+    };
+
+    return controller.stream;
   }
 
+  // yeni note oluştur (yalnızca backend + local cache)
   Future<void> createNote({
     required String title,
     required String content,
   }) async {
-    final uid = await _uid();
     final now = DateTime.now();
-    final doc = _userNotesCollection(uid).doc();
-    await doc.set({
-      'title': title,
-      'content': content,
-      'pinned': false,
-      'ownerId': uid,
-      'createdAt': now.millisecondsSinceEpoch,
-      'updatedAt': now.millisecondsSinceEpoch,
-    });
-    _syncBackendSafe(() async {
-      await _backendService.createNote(title: title, content: content);
-    });
+    // offline veya online fark etmeksizin: yerelde hemen göster
+    String tempId = DateTime.now().microsecondsSinceEpoch.toString();
+    if (_local != null) {
+      await _local!.upsertNote(
+        NoteModel(
+          id: tempId,
+          title: title,
+          content: content,
+          pinned: false,
+          createdAt: now,
+          updatedAt: now,
+          isDirty: true,
+        ),
+      );
+    }
+    // backend create
+    _syncBackendSafe(
+      () async {
+        final created = await _backendService.createNote(title: title, content: content);
+        final id = (created['id'] ?? '') as String;
+        if (_local != null && id.isNotEmpty) {
+          await _local!.upsertNote(
+            NoteModel(
+              id: id,
+              title: (created['title'] ?? title) as String,
+              content: (created['content'] ?? content) as String,
+              pinned: (created['pinned'] ?? false) as bool,
+              createdAt: DateTime.tryParse((created['createdAt'] ?? '') as String) ?? now,
+              updatedAt: DateTime.tryParse((created['updatedAt'] ?? '') as String) ?? now,
+              isDirty: false,
+            ),
+          );
+          // eski geçici kaydı kaldır
+          await _local!.deleteNote(tempId);
+        }
+      },
+      fallbackOp: {
+        'type': 'create',
+        'data': {'title': title, 'content': content},
+      },
+    );
   }
 
+  // mevcut note’u güncelle (yalnızca backend + local cache)
   Future<void> updateNote(NoteModel note) async {
-    final uid = await _uid();
     final now = DateTime.now();
-    await _userNotesCollection(uid).doc(note.id).update({
-      'title': note.title,
-      'content': note.content,
-      'updatedAt': now.millisecondsSinceEpoch,
-    });
+    if (_local != null) {
+      await _local!.upsertNote(
+        NoteModel(
+          id: note.id,
+          title: note.title,
+          content: note.content,
+          pinned: note.pinned,
+          createdAt: note.createdAt,
+          updatedAt: now,
+          isDirty: false,
+        ),
+      );
+    }
+
     _syncBackendSafe(() async {
-      // Firestore id is string; backend ids are ints. We skip mapping here.
-      // You can extend backend to accept externalId for reconciliation.
+      await _backendService.updateNote(id: note.id, title: note.title, content: note.content);
     });
   }
 
+  // pin durumunu değiştir (yalnızca backend + local cache)
   Future<void> togglePin(NoteModel note) async {
-    final uid = await _uid();
-    await _userNotesCollection(uid).doc(note.id).update({
-      'pinned': !note.pinned,
-      'updatedAt': DateTime.now().millisecondsSinceEpoch,
-    });
-  }
-
-  Future<void> deleteNote(NoteModel note) async {
-    final uid = await _uid();
-    await _userNotesCollection(uid).doc(note.id).delete();
+    if (_local != null) {
+      await _local!.upsertNote(
+        NoteModel(
+          id: note.id,
+          title: note.title,
+          content: note.content,
+          pinned: !note.pinned,
+          createdAt: note.createdAt,
+          updatedAt: DateTime.now(),
+          isDirty: false,
+        ),
+      );
+    }
     _syncBackendSafe(() async {
-      // Optional: if you maintain mapping to backend ids, call delete
+      await _backendService.updateNote(
+        id: note.id,
+        title: note.title,
+        content: note.content,
+        pinned: !note.pinned,
+      );
     });
   }
 
-  void _syncBackendSafe(Future<void> Function() task) async {
+  // note sil (yalnızca backend + local cache)
+  Future<void> deleteNote(NoteModel note) async {
+    if (_local != null) {
+      await _local!.deleteNote(note.id);
+    }
+
+    _syncBackendSafe(() async {
+      await _backendService.deleteNote(note.id);
+    });
+  }
+
+  // backend sync helper: internet varsa çalıştırır, yoksa kuyruğa atar
+  void _syncBackendSafe(
+    Future<void> Function() task, {
+    Map<String, dynamic>? fallbackOp,
+  }) async {
     try {
       final result = await Connectivity().checkConnectivity();
-      if (result == ConnectivityResult.none) return;
+      if (result == ConnectivityResult.none) {
+        if (fallbackOp != null && _local != null) {
+          await _local!.enqueueOp(fallbackOp);
+        }
+        return;
+      }
       await task();
     } catch (_) {
-      // best-effort; ignore
+      // ignore errors
     }
+  }
+
+  // offline kuyruğundaki işlemleri tekrar backend’e gönder
+  Future<void> syncPendingBackendOps() async {
+    if (_local == null) return;
+
+    final status = await Connectivity().checkConnectivity();
+    if (status == ConnectivityResult.none) return;
+
+    final ops = _local!.pendingOps();
+    for (final op in ops) {
+      final type = op['type'] as String?;
+      final data = Map<String, dynamic>.from(op['data'] as Map? ?? {});
+
+      try {
+        if (type == 'create') {
+          final title = data['title'] as String? ?? '';
+          final content = data['content'] as String? ?? '';
+          await _backendService.createNote(title: title, content: content);
+        }
+        // ileride update/delete de eklenebilir
+      } catch (_) {
+        // başarısız olursa kuyruğa bırak, sonraki denemeye kalır
+      }
+    }
+
+    await _local!.clearOps();
   }
 }

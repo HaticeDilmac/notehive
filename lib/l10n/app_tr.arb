@@ -53,5 +53,8 @@
   "goodMorning": "Günaydın",
   "goodAfternoon": "İyi günler",
   "goodEvening": "İyi akşamlar",
-  "goodNight": "İyi geceler"
+  "goodNight": "İyi geceler",
+  "notesUndo": "Geri Al",
+  "notesDeleted": "Not silindi",
+  "routerNotFound": "404 - Sayfa Bulunamadı"
 }

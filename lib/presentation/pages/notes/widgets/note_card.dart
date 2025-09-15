@@ -23,46 +23,30 @@ class NoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final gradients = [
-      [
-        colorScheme.primaryContainer.withOpacity(0.85),
-        colorScheme.secondaryContainer.withOpacity(0.65),
-      ],
-      [
-        colorScheme.tertiaryContainer.withOpacity(0.85),
-        colorScheme.primaryContainer.withOpacity(0.65),
-      ],
-      [
-        colorScheme.secondaryContainer.withOpacity(0.85),
-        colorScheme.tertiaryContainer.withOpacity(0.65),
-      ],
-      [
-        colorScheme.surfaceVariant.withOpacity(0.8),
-        colorScheme.primaryContainer.withOpacity(0.55),
-      ],
-    ];
-    final selectedColors = gradients[colorIndex % gradients.length];
+    // Keep colorIndex for subtle accent usage
+    final accentColor = [
+      colorScheme.primary,
+      colorScheme.secondary,
+      colorScheme.tertiary,
+      colorScheme.primary,
+    ][colorIndex % 4];
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Ink(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: selectedColors,
-          ),
-          borderRadius: BorderRadius.circular(20),
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 6),
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 8),
             ),
           ],
           border: Border.all(
-            color: colorScheme.surfaceVariant.withOpacity(0.5),
+            color: colorScheme.outlineVariant.withOpacity(0.5),
             width: 1,
           ),
         ),
@@ -90,10 +74,10 @@ class NoteCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer.withOpacity(0.9),
+                        color: accentColor.withOpacity(0.10),
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(
-                          color: colorScheme.primary.withOpacity(0.2),
+                          color: accentColor.withOpacity(0.25),
                         ),
                       ),
                       child: Row(
@@ -102,7 +86,7 @@ class NoteCard extends StatelessWidget {
                           Icon(
                             Icons.push_pin,
                             size: 14,
-                            color: colorScheme.onPrimaryContainer,
+                            color: accentColor,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -110,7 +94,7 @@ class NoteCard extends StatelessWidget {
                             style: Theme.of(
                               context,
                             ).textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onPrimaryContainer,
+                              color: accentColor,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

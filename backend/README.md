@@ -20,7 +20,7 @@ pip install -r requirements.txt
 
 Provide the service account path via environment variable (must belong to your Firebase project):
 ```bash
-export GOOGLE_APPLICATION_CREDENTIALS="/abs/path/service-account.json"   # macOS/Linux
+export GOOGLE_APPLICATION_CREDENTIALS="/Users/hatice/Development/FlutterProjects/notehive/backend/notehive-app-firebase-adminsdk-fbsvc-dcdf21c72c.json"   # macOS/Linux
 # Windows PowerShell:
 # $env:GOOGLE_APPLICATION_CREDENTIALS = "C:\\abs\\path\\service-account.json"
 ```

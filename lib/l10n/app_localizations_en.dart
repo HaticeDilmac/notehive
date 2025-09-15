@@ -172,4 +172,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goodNight => 'Good night';
+
+  @override
+  String get notesUndo => 'Undo';
+
+  @override
+  String get notesDeleted => 'Note deleted';
+
+  @override
+  String get routerNotFound => '404 - Page Not Found';
 }

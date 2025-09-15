@@ -172,4 +172,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get goodNight => 'İyi geceler';
+
+  @override
+  String get notesUndo => 'Geri Al';
+
+  @override
+  String get notesDeleted => 'Not silindi';
+
+  @override
+  String get routerNotFound => '404 - Sayfa Bulunamadı';
 }
