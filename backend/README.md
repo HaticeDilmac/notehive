@@ -19,10 +19,31 @@ pip install -r requirements.txt
 ```
 
 Provide the service account path via environment variable (must belong to your Firebase project):
+
+Firebase Admin SDK key placement
+1) Do NOT commit the service account JSON to the repo. Save it locally at: `backend/credentials/firebase-admin-key.json` (you can create the folder).
+2) Set Application Default Credentials (ADC) with an environment variable:
 ```bash
-export GOOGLE_APPLICATION_CREDENTIALS="/Users/hatice/Development/FlutterProjects/notehive/backend/notehive-app-firebase-adminsdk-fbsvc-dcdf21c72c.json"   # macOS/Linux
-# Windows PowerShell:
-# $env:GOOGLE_APPLICATION_CREDENTIALS = "C:\\abs\\path\\service-account.json"
+# macOS/Linux (temporary - current terminal only)
+export GOOGLE_APPLICATION_CREDENTIALS="/ABSOLUTE/PATH/FlutterProjects/notehive/backend/credentials/firebase-admin-key.json"
+
+# Make it permanent (zsh):
+echo 'export GOOGLE_APPLICATION_CREDENTIALS="/ABSOLUTE/PATH/FlutterProjects/notehive/backend/credentials/firebase-admin-key.json"' >> ~/.zshrc && source ~/.zshrc
+
+# Windows PowerShell (temporary):
+$env:GOOGLE_APPLICATION_CREDENTIALS = "C:\\ABSOLUTE\\PATH\\FlutterProjects\\notehive\\backend\\credentials\\firebase-admin-key.json"
+```
+3) Verify (optional):
+```bash
+source venv/bin/activate
+python - <<'PY'
+import firebase_admin
+try:
+    firebase_admin.initialize_app()
+    print("Firebase Admin initialized via ADC")
+except Exception as e:
+    raise SystemExit(e)
+PY
 ```
 
 ### Run
